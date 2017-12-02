@@ -61,7 +61,12 @@ function World(map, legend) {
 	this.grid = grid;
 	this.legend = legend;
 
-
+	map.forEach(function(line, y) {
+		for ( var x = 0; x < line.length; x++) {
+			this.grid.set(new Vector(x, y), 
+				elementFromChar(legend, line[x]));
+		}
+	});
 }
 
 
