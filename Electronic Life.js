@@ -1,3 +1,17 @@
+// Contains an array representing the world map.
+var plan = ["############################",
+            "#      #    #      o      ##",
+            "#                          #",
+            "#          #####           #",
+            "##         #   #    ##     #",
+            "###           ##     #     #",
+            "#           ###      #     #",
+            "#   ####                   #",
+            "#   ##       o             #",
+            "# o  #         o       ### #",
+            "#    #                     #",
+            "############################"];
+
 // Represents coordinates used for example when requesting a square from a grid.
 function Vector(x, y) {
 	this.x = x;
@@ -27,6 +41,16 @@ Grid.prototype.set = function(vector, value) {
 	this.space[vector.x + this.width * vector.y] = value;
 };
 
+Grid.prototype.forEach = function(f, context) {
+	for (var y = 0; y < this.width; y++) {
+		for (var x = 0; x < this.width; x++) {
+			var value = this.space[x + y * this.width];
+			if (value != null)
+				f.call(context, value, new Vector(x, y));
+		}
+	}
+}
+
 // Returns a random element from an array.
 function randomElement(array) {
 	return array[Math.floor(Math.random() * array.length)];
@@ -38,6 +62,9 @@ var directionNames = "n ne e se s sw w nw".split(" ");
 function BouncingCritter() {
 	this.direction = randomElement(directionNames);
 }
+
+// Creates a wall object.
+function Wall() {}
 
 // Returns an action object containing a action type and added information based on the results of the look and/or find methods.
 BouncingCritter.prototype.act = function (view) {
@@ -55,6 +82,14 @@ function elementFromChar(legend, ch) {
 	return element;
 }
 
+// Returns the actual char contained by the given element.
+function charFromElement(element) {
+	if (element == null)
+		return " ";
+	else
+		return element.originChar;
+}
+
 // Returns a World object which contains a Grid object and sets the Grid's space array.
 function World(map, legend) {
 	var grid = new Grid(map[0].length, map.length);
@@ -63,15 +98,56 @@ function World(map, legend) {
 
 	map.forEach(function(line, y) {
 		for ( var x = 0; x < line.length; x++) {
-			this.grid.set(new Vector(x, y), 
+			grid.set(new Vector(x, y), 
 				elementFromChar(legend, line[x]));
 		}
 	});
 }
 
+// Creates a string out of the current Grid state.
+World.prototype.toString = function() {
+	var output = "";
+	for (var y = 0; y < this.grid.height; y++) {
+		for (var x = 0; x < this.grid.width; x++) {
+			var element = this.grid.get(new Vector(x, y));
+			output += charFromElement(element);
+		}
+		output += "\n";
+	}
+	return output;
+}
+
+World.prototype.turn = function() {
+	var acted = [];
+	this.grid.forEach(function(critter, vector) {
+		if (critter.act && acted.indexOf(critter) == -1)
+			acted.push(critter);
+			this.letAct(critter, vector);
+	}, this);
+};
+
+World.prototype.letAct = function(critter, vector) {
+	var action = critter.act(new View(this, vector));
+	if (action && action.type == "move") {
+		var dest = this.checkDestination(action, vector)
+		if (dest && this.grid.get(dest) == null) {
+			this.grid.set(vector, null)
+			this.grid.set(dest, critter)
+		}
+	}
+};
+
+World.prototype.checkDestination = function(action, vector) {
+	if (directions.hasOwnProperty(action.direction)) {
+		var dest = vector.plus(directions[action.direction]);
+		if (this.grid.isInside(dest))
+			return dest;
+	}
+};
 
 
-
+var world = new World(plan, { "#": Wall, "o": BouncingCritter });
+console.log(world.toString());
 
 
 
