@@ -169,7 +169,7 @@ View.prototype.look = function(dir) {
 	if (this.world.grid.isInside(target))
 		return charFromElement(this.world.grid.get(target));
 	else
-		;return "#";
+		return "#";
 }
 
 // Returns all coordinates corresponding to the given char argument based on the current critters' position.
@@ -188,6 +188,27 @@ View.prototype.find = function(ch) {
 	if (found.length == 0)
 		return null;
 	return randomElement(found);
+};
+
+function dirPlus(dir, n) {
+	var index = directionNames.indexOf(dir);
+	return indexNames[(index + n) % 8];
+}
+
+function WallFollower() {
+	this.dir = "s";
+}
+
+wallFollower.prototyp.act = function(view) {
+	var start = this.dir;
+	if (view.look(dirPlus(this.dir, -3)) != " ")
+		start = this.dir = dirPlus(this.dir, -2);
+	while (view.look(this.direction) != " ") {
+		this.dir = dirPlus(this.dir, 1);
+		if (this.dir == start) 
+			break;
+	}
+	return {type: "move", direction: this.dir};
 };
 
 
