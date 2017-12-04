@@ -156,11 +156,13 @@ World.prototype.checkDestination = function(action, vector) {
 	}
 };
 
+// Creates a View object.
 function View(world, vector) {
 	this.world = world;
 	this.vector = vector;
 }
 
+// Returns the actual char corresponding to the given direction and bases on the current critters' position or a wall character if non is found. 
 View.prototype.look = function(dir) {
 	var target = this.vector.plus(directions[dir]);
 	if (this.world.grid.isInside(target)
@@ -169,6 +171,7 @@ View.prototype.look = function(dir) {
 		;return "#";
 }
 
+// Returns all coordinates corresponding to the given char argument based on the current critters' position.
 View.prototype.findAll = function(ch) {
 	var found = [];
 	for (var dir in directions) {
@@ -178,6 +181,7 @@ View.prototype.findAll = function(ch) {
 	return found;
 };
 
+// Returns a random coordinate if multiple coordinates are found which match the given char argument or null if none are found.
 View.prototype.find = function(ch) {
 	var found = this.findAll(ch);
 	if (found.length == 0)
