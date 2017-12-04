@@ -42,7 +42,7 @@ Grid.prototype.set = function(vector, value) {
 };
 
 Grid.prototype.forEach = function(f, context) {
-	for (var y = 0; y < this.width; y++) {
+	for (var y = 0; y < this.height; y++) {
 		for (var x = 0; x < this.width; x++) {
 			var value = this.space[x + y * this.width];
 			if (value != null)
@@ -54,6 +54,17 @@ Grid.prototype.forEach = function(f, context) {
 // Returns a random element from an array.
 function randomElement(array) {
 	return array[Math.floor(Math.random() * array.length)];
+};
+
+var directions = {
+	"n": 	new Vector( 0, -1),
+	"ne": new Vector( 1, -1),
+	"e": 	new Vector( 1,  0),
+	"se": new Vector( 1,  1),
+	"s": 	new Vector( 0,  1),
+	"sw": new Vector(-1,  1),
+	"w": 	new Vector(-1,  0),
+	"nw": new Vector(-1, -1),
 };
 
 var directionNames = "n ne e se s sw w nw".split(" ");
