@@ -42,14 +42,14 @@ Grid.prototype.set = function(vector, value) {
 };
 
 Grid.prototype.forEach = function(f, context) {
-	for (var y = 0; y < this.height; y++) {
-		for (var x = 0; x < this.width; x++) {
-			var value = this.space[x + y * this.width];
-			if (value != null)
-				f.call(context, value, new Vector(x, y));
-		}
-	}
-}
+  for (var y = 0; y < this.height; y++) {
+    for (var x = 0; x < this.width; x++) {
+      var value = this.space[x + y * this.width];
+      if (value != null)
+        f.call(context, value, new Vector(x, y));
+    }
+  }
+};
 
 // Returns a random element from an array.
 function randomElement(array) {
@@ -71,20 +71,20 @@ var directionNames = "n ne e se s sw w nw".split(" ");
 
 // Creates a simple critter object.
 function BouncingCritter() {
-	this.direction = randomElement(directionNames);
-}
+  this.direction = randomElement(directionNames);
+};
+
+// Returns an action object containing a action type and added information based on the results of the look and/or find methods.
+BouncingCritter.prototype.act = function(view) {
+  if (view.look(this.direction) != " ")
+    this.direction = view.find(" ") || "s";
+  return {type: "move", direction: this.direction};
+};
 
 // Creates a wall object.
 function Wall() {}
 
-// Returns an action object containing a action type and added information based on the results of the look and/or find methods.
-BouncingCritter.prototype.act = function (view) {
-	if (view.look(this.direction) != " ")
-		this.direction = view.find(" ") || "s";
-	return { type: "move", direction: this.direction };
-};
-
-// Returns a legend object which contains the meaning of the characters used in a map.
+// Returns a element object which contains the meaning of the characters used in a map.
 function elementFromChar(legend, ch) {
 	if (ch == " ")
 		return null;
@@ -129,31 +129,32 @@ World.prototype.toString = function() {
 }
 
 World.prototype.turn = function() {
-	var acted = [];
-	this.grid.forEach(function(critter, vector) {
-		if (critter.act && acted.indexOf(critter) == -1)
-			acted.push(critter);
-			this.letAct(critter, vector);
-	}, this);
+  var acted = [];
+  this.grid.forEach(function(critter, vector) {
+    if (critter.act && acted.indexOf(critter) == -1) {
+      acted.push(critter);
+      this.letAct(critter, vector);
+    }
+  }, this);
 };
 
 World.prototype.letAct = function(critter, vector) {
-	var action = critter.act(new View(this, vector));
-	if (action && action.type == "move") {
-		var dest = this.checkDestination(action, vector)
-		if (dest && this.grid.get(dest) == null) {
-			this.grid.set(vector, null)
-			this.grid.set(dest, critter)
-		}
-	}
+  var action = critter.act(new View(this, vector));
+  if (action && action.type == "move") {
+    var dest = this.checkDestination(action, vector);
+    if (dest && this.grid.get(dest) == null) {
+      this.grid.set(vector, null);
+      this.grid.set(dest, critter);
+    }
+  }
 };
 
 World.prototype.checkDestination = function(action, vector) {
-	if (directions.hasOwnProperty(action.direction)) {
-		var dest = vector.plus(directions[action.direction]);
-		if (this.grid.isInside(dest))
-			return dest;
-	}
+  if (directions.hasOwnProperty(action.direction)) {
+    var dest = vector.plus(directions[action.direction]);
+    if (this.grid.isInside(dest))
+      return dest;
+  }
 };
 
 // Creates a View object.
@@ -165,7 +166,7 @@ function View(world, vector) {
 // Returns the actual char corresponding to the given direction and bases on the current critters' position or a wall character if non is found. 
 View.prototype.look = function(dir) {
 	var target = this.vector.plus(directions[dir]);
-	if (this.world.grid.isInside(target)
+	if (this.world.grid.isInside(target))
 		return charFromElement(this.world.grid.get(target));
 	else
 		;return "#";
@@ -190,8 +191,11 @@ View.prototype.find = function(ch) {
 };
 
 
-var world = new World(plan, { "#": Wall, "o": BouncingCritter });
+var world = new World(plan, {"#": Wall, "o": BouncingCritter});
 console.log(world.toString());
 
-
+for (var i = 0; i < 5; i++) {
+	world.turn();
+	console.log(world.toString());
+}
 
