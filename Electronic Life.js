@@ -261,6 +261,16 @@ actionTypes.move = function(critter, vector, action) {
 	return true;
 };
 
+actionTypes.eat = function(critter, vector, action) {
+	var dest = this.checkDestination(action, vector);
+	var atDest = dest != null && this.grid.get(dest);
+	if (!atDest || atDest.energy == null)
+		return false;
+	critter.energy += atDest.energy;
+	this.grid.set(dest, null);
+	return true;
+}
+
 var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
 console.log(world.toString());
 
