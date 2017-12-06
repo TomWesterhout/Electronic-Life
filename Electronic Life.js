@@ -129,13 +129,13 @@ World.prototype.toString = function() {
 }
 
 World.prototype.turn = function() {
-  var acted = [];
-  this.grid.forEach(function(critter, vector) {
-    if (critter.act && acted.indexOf(critter) == -1) {
-      acted.push(critter);
-      this.letAct(critter, vector);
-    }
-  }, this);
+	var acted = [];
+	this.grid.forEach(function(critter, vector) {
+		if (critter.act && acted.indexOf(critter) == -1) {
+			acted.push(critter);
+			this.letAct(critter, vector);
+		}
+	}, this);
 };
 
 World.prototype.letAct = function(critter, vector) {
@@ -192,14 +192,14 @@ View.prototype.find = function(ch) {
 
 function dirPlus(dir, n) {
 	var index = directionNames.indexOf(dir);
-	return indexNames[(index + n) % 8];
+	return directionNames[(index + n) % 8];
 }
 
 function WallFollower() {
 	this.dir = "s";
 }
 
-wallFollower.prototyp.act = function(view) {
+wallFollower.prototype.act = function(view) {
 	var start = this.dir;
 	if (view.look(dirPlus(this.dir, -3)) != " ")
 		start = this.dir = dirPlus(this.dir, -2);
@@ -211,8 +211,28 @@ wallFollower.prototyp.act = function(view) {
 	return {type: "move", direction: this.dir};
 };
 
+function LifeLikeWorld(map, legend) {
+	World.call(this, map, legend);
+}
 
-var world = new World(plan, {"#": Wall, "o": BouncingCritter});
+LifeLikeWorld.prototype = Object.create(World.prototype);
+
+var actionTypes = Object.create(null);
+
+LifeLikeWorld.prototype.letAct = function(critter, vector) {
+	var action = critter.act(new View(this, vector));
+	var handled = action && 
+		action.type in actionTypes && 
+		actionTypes[action.type].call(this, critter, vector, action);
+		
+	if (!handled) {
+		critter.energy -= 0.2;
+		if (critter.energy <= 0)
+			this.grid.set(vector, null);
+	}
+};
+
+var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
 console.log(world.toString());
 
 for (var i = 0; i < 5; i++) {
