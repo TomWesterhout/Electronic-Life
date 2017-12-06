@@ -190,15 +190,19 @@ View.prototype.find = function(ch) {
 	return randomElement(found);
 };
 
+// Returns a direction bases on the original direction + n times.
 function dirPlus(dir, n) {
 	var index = directionNames.indexOf(dir);
 	return directionNames[(index + n) % 8];
 }
 
+// Returns a WallFollower object that moves alongside the wall of the given map.
 function WallFollower() {
 	this.dir = "s";
 }
 
+// The critter looks around its environment (clockwise) until it reaches open space and stops if it reaches its origin direction.
+// Lets the critter move in a straight line or scan to the left if there is an object left-right behind it.
 wallFollower.prototype.act = function(view) {
 	var start = this.dir;
 	if (view.look(dirPlus(this.dir, -3)) != " ")
@@ -211,6 +215,7 @@ wallFollower.prototype.act = function(view) {
 	return {type: "move", direction: this.dir};
 };
 
+// Returns a LifeLikeWorld object which contains all the attributes and methods of a World object.
 function LifeLikeWorld(map, legend) {
 	World.call(this, map, legend);
 }
@@ -219,6 +224,9 @@ LifeLikeWorld.prototype = Object.create(World.prototype);
 
 var actionTypes = Object.create(null);
 
+// Checks whether it returned a action, if there is a available handler function for the returned action 
+// and if it returned true after calling it.
+// If none of the above is true the critter loses energy and is destroyed if its energy level reaches zero or below.
 LifeLikeWorld.prototype.letAct = function(critter, vector) {
 	var action = critter.act(new View(this, vector));
 	var handled = action && 
@@ -232,11 +240,15 @@ LifeLikeWorld.prototype.letAct = function(critter, vector) {
 	}
 };
 
+// The critter rises in energy level and returns true.
 actionTypes.grow = function(critter) {
 	critter.energy += 0.5;
 	return true;
 };
 
+// Returns false if there is no destination, the critters energy level is lower than 1 
+// and there is an object in the destination square.
+// Otherwise it moves the critter to the destination square and lowers its energy level by 1.
 actionTypes.move = function(critter, vector, action) {
 	var dest = this.checkDestination(action, vector);
 	if (dest == null || 
