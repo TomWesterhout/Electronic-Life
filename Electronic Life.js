@@ -261,6 +261,9 @@ actionTypes.move = function(critter, vector, action) {
 	return true;
 };
 
+// Checks if the destination square isn't blank (null) and returns the given object that fills the destination in the atDest var.
+// Afterwards the function returns false if atDest isn't true and the object that fills the square has zero energy.
+// If true, it transfers the atDest energy level to the critter performing the function and sets the destination square to zero.
 actionTypes.eat = function(critter, vector, action) {
 	var dest = this.checkDestination(action, vector);
 	var atDest = dest != null && this.grid.get(dest);
@@ -280,6 +283,22 @@ actionTypes.reproduce = function(critter, vector, action) {
 	critter.energy -= 2 * baby.energy;
 	this.grid.set(dest, baby);
 	return true;
+};
+
+// Returns a Plant object.
+function Plant() {
+	this.energy = 3 + Math.random() * 4;
+}
+
+// Returns a reproduce action if its energy level is higher than 15 and a grow action if lower than 20.
+Plant.prototype.act = function() {
+	if (this.energy > 15) {
+		var space = view.find(" ");
+		if (space)
+			return {type: "reproduce", direction: space};
+	}
+	if (this.energy < 20)
+		return {type: "grow"};
 };
 
 var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
