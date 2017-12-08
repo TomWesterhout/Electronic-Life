@@ -324,14 +324,27 @@ function PlantEater() {
 
 PlantEater.prototype.act = function() {
 	var space = view.find(" ");
-	if (this.energy > 60 && space)
+	if (this.energy > 80 && space)
 		return {type: "reproduce", direction: space};
-	var plant = view.find("*");
-	if (plant)
-		return {type: "eat", direction: plant};
+	var plants = view.findAll("*");
+	var count = 0;
+	if (plant && count >= 2 && plants.length >= 2)
+		if (coun >= 2 && plants.length >= 2)
+			count = 0;
+			return {type: "eat", direction: plants[Math.floor(Math.random(plants.length))]};
+		else
+			count += 1;
 	if (space)
-		return {type: "move", direction: space};
-}
+		var start = space;
+		if (view.look(dirPlus(space, -3)) != " ")
+			space = dirPlus(space, -2);
+		while (view.look(space) != " ") {
+			space = dirPlus(space, 1);
+			if (start == space)
+				break;
+		}
+	return {type: "move", direction: start};
+};
 
 var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
 console.log(world.toString());
