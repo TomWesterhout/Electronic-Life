@@ -271,6 +271,17 @@ actionTypes.eat = function(critter, vector, action) {
 	return true;
 }
 
+actionTypes.reproduce = function(critter, vector, action) {
+	var baby = elementFromChar(this.legend, critter.originChar);
+	var dest = this.checkDestination(action, vector);
+	if (dest == null ||
+			critter.energy <= 2 * baby.energy ||
+			this.grid.get(dest) != null )
+	critter.energy -= 2 * baby.energy;
+	this.grid.set(dest, baby);
+	return true;
+};
+
 var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
 console.log(world.toString());
 
