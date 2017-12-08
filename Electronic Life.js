@@ -224,7 +224,7 @@ LifeLikeWorld.prototype = Object.create(World.prototype);
 
 var actionTypes = Object.create(null);
 
-// Checks whether it returned a action, if there is a available handler function for the returned action 
+// Checks whether it returned an action, if there is a available handler function for the returned action 
 // and if it returned true after calling it.
 // If none of the above is true the critter loses energy and is destroyed if its energy level reaches zero or below.
 LifeLikeWorld.prototype.letAct = function(critter, vector) {
@@ -300,6 +300,21 @@ Plant.prototype.act = function() {
 	if (this.energy < 20)
 		return {type: "grow"};
 };
+
+function PlantEater() {
+	this.energy = 20;
+}
+
+PlantEater.prototype.act = function() {
+	var space = view.find(" ");
+	if (this.energy > 60 && space)
+		return {type: "reproduce", direction: space};
+	var plant = view.find("*");
+	if (plant)
+		return {type: "eat", direction: plant};
+	if (space)
+		return {type: "move", direction: space};
+}
 
 var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
 console.log(world.toString());
