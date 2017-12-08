@@ -12,6 +12,23 @@ var plan = ["############################",
             "#    #                     #",
             "############################"];
 
+var valley = new LifeLikeWorld(["############################",
+   															"#####                 ######",
+   															"##   ***                **##",
+   															"#   *##**         **  O  *##",
+   															"#    ***     O    ##**    *#",
+   															"#       O         ##***    #",
+   															"#                 ##**     #",
+   															"#   O       #*             #",
+   															"#*          #**       O    #",
+   															"#***        ##**    O    **#",
+   															"##****     ###***       *###",
+   															"############################"],
+  															{"#": Wall,
+  															 "O": PlantEater,
+  															 "*": Plant}
+);
+
 // Represents coordinates used for example when requesting a square from a grid.
 function Vector(x, y) {
 	this.x = x;
