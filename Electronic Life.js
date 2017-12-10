@@ -291,12 +291,16 @@ actionTypes.eat = function(critter, vector, action) {
 	return true;
 }
 
+// Creates and sets an infant critter if there is a destination,
+// the critters energy level is more than twice the infant energy level
+// and the destination is not filled by another element.
 actionTypes.reproduce = function(critter, vector, action) {
 	var baby = elementFromChar(this.legend, critter.originChar);
 	var dest = this.checkDestination(action, vector);
 	if (dest == null ||
 			critter.energy <= 2 * baby.energy ||
 			this.grid.get(dest) != null )
+		return false;
 	critter.energy -= 2 * baby.energy;
 	this.grid.set(dest, baby);
 	return true;
@@ -322,22 +326,23 @@ function PlantEater() {
 	this.energy = 20;
 }
 
+// Performs different actions based on the outcome of the defined conditionals.
 PlantEater.prototype.act = function() {
 	var space = view.find(" ");
-	if (this.energy > 80 && space)
+	if (this.energy > 80 && space) // If the critter's energy level is beyond 80 and there is available space it reproduces.
 		return {type: "reproduce", direction: space};
 	var plants = view.findAll("*");
 	var count = 0;
-	if (plant && count >= 2 && plants.length >= 2)
-		if (coun >= 2 && plants.length >= 2)
+	if (plants) // If there are multiple plants nearby and the counter reaches 2 or more the critter eats.
+		if (count >= 2 && plants.length >= 2)
 			count = 0;
 			return {type: "eat", direction: plants[Math.floor(Math.random(plants.length))]};
 		else
 			count += 1;
-	if (space)
+	if (space) // Moves the critter in a straight line and checks for available space in a clockwise rotation.
 		var start = space;
-		if (view.look(dirPlus(space, -3)) != " ")
-			space = dirPlus(space, -2);
+		if (view.look(dirPlus(space, -3)) != " ") // Prevents circling around a object.
+			start = space = dirPlus(space, -2);
 		while (view.look(space) != " ") {
 			space = dirPlus(space, 1);
 			if (start == space)
