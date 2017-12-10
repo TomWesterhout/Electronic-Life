@@ -12,21 +12,47 @@ var plan = ["############################",
             "#    #                     #",
             "############################"];
 
-var valley = new LifeLikeWorld(["############################",
-   															"#####                 ######",
-   															"##   ***                **##",
-   															"#   *##**         **  O  *##",
-   															"#    ***     O    ##**    *#",
-   															"#       O         ##***    #",
-   															"#                 ##**     #",
-   															"#   O       #*             #",
-   															"#*          #**       O    #",
-   															"#***        ##**    O    **#",
-   															"##****     ###***       *###",
-   															"############################"],
-  															{"#": Wall,
-  															 "O": PlantEater,
-  															 "*": Plant}
+var valley = new LifeLikeWorld(
+	["############################",
+   "#####                 ######",
+   "##   ***                **##",
+   "#   *##**         **  O  *##",
+   "#    ***     O    ##**    *#",
+   "#       O         ##***    #",
+   "#                 ##**     #",
+   "#   O       #*             #",
+   "#*          #**       O    #",
+   "#***        ##**    O    **#",
+   "##****     ###***       *###",
+   "############################"],
+  {"#": Wall,
+   "O": PlantEater,
+   "*": Plant}
+);
+
+var largeValley = new LifelikeWorld(
+  ["####################################################",
+   "#                 ####         ****              ###",
+   "#   *  @  ##                 ########       OO    ##",
+   "#   *    ##        O O                 ****       *#",
+   "#       ##*                        ##########     *#",
+   "#      ##***  *         ****                     **#",
+   "#* **  #  *  ***      #########                  **#",
+   "#* **  #      *               #   *              **#",
+   "#     ##              #   O   #  ***          ######",
+   "#*            @       #       #   *        O  #    #",
+   "#*                    #  ######                 ** #",
+   "###          ****          ***                  ** #",
+   "#       O                        @         O       #",
+   "#   *     ##  ##  ##  ##               ###      *  #",
+   "#   **         #              *       #####  O     #",
+   "##  **  O   O  #  #    ***  ***        ###      ** #",
+   "###               #   *****                    ****#",
+   "####################################################"],
+  {"#": Wall,
+   "@": Tiger,
+   "O": SmartPlantEater, // from previous exercise
+   "*": Plant}
 );
 
 // Represents coordinates used for example when requesting a square from a grid.
@@ -322,12 +348,12 @@ Plant.prototype.act = function() {
 		return {type: "grow"};
 };
 
-function PlantEater() {
+function SmartPlantEater() {
 	this.energy = 20;
 }
 
 // Performs different actions based on the outcome of the defined conditionals.
-PlantEater.prototype.act = function() {
+SmartPlantEater.prototype.act = function() {
 	var space = view.find(" ");
 	if (this.energy > 80 && space) // If the critter's energy level is beyond 80 and there is available space it reproduces.
 		return {type: "reproduce", direction: space};
@@ -350,6 +376,14 @@ PlantEater.prototype.act = function() {
 		}
 	return {type: "move", direction: start};
 };
+
+function Predator() {
+	this.energy = 50;
+}
+
+Predator.prototype.act = function() {
+	
+}
 
 var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
 console.log(world.toString());
