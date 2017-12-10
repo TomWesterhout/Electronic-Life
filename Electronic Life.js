@@ -353,37 +353,46 @@ function SmartPlantEater() {
 }
 
 // Performs different actions based on the outcome of the defined conditionals.
-SmartPlantEater.prototype.act = function() {
+SmartPlantEater.prototype.act = function(view) {
 	var space = view.find(" ");
-	if (this.energy > 80 && space) // If the critter's energy level is beyond 80 and there is available space it reproduces.
-		return {type: "reproduce", direction: space};
 	var plants = view.findAll("*");
 	var count = 0;
+	var start = space;
+	if (this.energy > 80 && space) // If the critter's energy level is beyond 80 and there is available space it reproduces.
+		return {type: "reproduce", direction: space};
 	if (plants) // If there are multiple plants nearby and the counter reaches 2 or more the critter eats.
 		if (count >= 2 && plants.length >= 2)
 			count = 0;
-			return {type: "eat", direction: plants[Math.floor(Math.random(plants.length))]};
+			return {type: "eat", direction: randomElement(plants)};
 		else
 			count += 1;
-	if (space) // Moves the critter in a straight line and checks for available space in a clockwise rotation.
-		var start = space;
-		if (view.look(dirPlus(space, -3)) != " ") // Prevents circling around a object.
+	if (space) { // Prevents the critter from moving around an object in circles or moves to the found location otherwise.
+		if (view.look(dirPlus(space, -3)) != " ")
 			start = space = dirPlus(space, -2);
-		while (view.look(space) != " ") {
-			space = dirPlus(space, 1);
-			if (start == space)
-				break;
-		}
-	return {type: "move", direction: start};
+		return {type: "move", direction: space};
+	}
 };
 
+// Creates a Predator object.
 function Predator() {
 	this.energy = 50;
 }
 
-Predator.prototype.act = function() {
-	
-}
+// Performs different actions based on the outcome of the defined conditionals.
+Predator.prototype.act = function(view) {
+	var space = view.find(" ");
+	var critters = view.findAll("O").concat(view.findAll("*"));
+	var start = space;
+	if (this.energy > 100 && space)
+		return {type: "reproduce", direction: space};
+	if (critters)
+		return {type: "eat", direction: randomElement(critters)};
+	if (space) { // Prevents the critter from moving around an object in circles or moves to the found location otherwise.
+		if (view.look(dirPlus(space, -3)) != " ")
+			start = space = dirPlus(space, -2);
+		return {type: "move", direction: space};
+	}
+};
 
 var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
 console.log(world.toString());
