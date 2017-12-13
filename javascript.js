@@ -320,7 +320,7 @@ function Predator() {
 Predator.prototype.act = function(view) {
 	var space = view.find(" ");
 	var critters = view.findAll("O");
-	if (this.energy > 80 && space)
+	if (this.energy > 60 && space)
 		return {type: "reproduce", direction: space};
 	if (critters.length >= 1)
 		return {type: "eat", direction: randomElement(critters)};
@@ -348,7 +348,7 @@ function refreshMap() {
 // calls the refreshMap function by an interval of 200ms and sets the refrsh state to true if false.
 function setMapInterval() {
 	if (!mapRefreshState)
-		setInterval(refreshMap, 1000);
+		setInterval(refreshMap, 500);
 		mapRefreshState = true;
 }
 
