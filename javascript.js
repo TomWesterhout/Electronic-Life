@@ -1,60 +1,3 @@
-// Contains an array representing the world map.
-var plan = ["############################",
-            "#      #    #      o      ##",
-            "#                          #",
-            "#          #####           #",
-            "##         #   #    ##     #",
-            "###           ##     #     #",
-            "#           ###      #     #",
-            "#   ####                   #",
-            "#   ##       o             #",
-            "# o  #         o       ### #",
-            "#    #                     #",
-            "############################"];
-
-var valley = new LifeLikeWorld(
-	["############################",
-   "#####                 ######",
-   "##   ***                **##",
-   "#   *##**         **  O  *##",
-   "#    ***     O    ##**    *#",
-   "#       O         ##***    #",
-   "#                 ##**     #",
-   "#   O       #*             #",
-   "#*          #**       O    #",
-   "#***        ##**    O    **#",
-   "##****     ###***       *###",
-   "############################"],
-  {"#": Wall,
-   "O": PlantEater,
-   "*": Plant}
-);
-
-var largeValley = new LifelikeWorld(
-  ["####################################################",
-   "#                 ####         ****              ###",
-   "#   *  @  ##                 ########       OO    ##",
-   "#   *    ##        O O                 ****       *#",
-   "#       ##*                        ##########     *#",
-   "#      ##***  *         ****                     **#",
-   "#* **  #  *  ***      #########                  **#",
-   "#* **  #      *               #   *              **#",
-   "#     ##              #   O   #  ***          ######",
-   "#*            @       #       #   *        O  #    #",
-   "#*                    #  ######                 ** #",
-   "###          ****          ***                  ** #",
-   "#       O                        @         O       #",
-   "#   *     ##  ##  ##  ##               ###      *  #",
-   "#   **         #              *       #####  O     #",
-   "##  **  O   O  #  #    ***  ***        ###      ** #",
-   "###               #   *****                    ****#",
-   "####################################################"],
-  {"#": Wall,
-   "@": Tiger,
-   "O": SmartPlantEater, // from previous exercise
-   "*": Plant}
-);
-
 // Represents coordinates used for example when requesting a square from a grid.
 function Vector(x, y) {
 	this.x = x;
@@ -172,13 +115,13 @@ World.prototype.toString = function() {
 }
 
 World.prototype.turn = function() {
-	var acted = [];
-	this.grid.forEach(function(critter, vector) {
-		if (critter.act && acted.indexOf(critter) == -1) {
-			acted.push(critter);
-			this.letAct(critter, vector);
-		}
-	}, this);
+  var acted = [];
+  this.grid.forEach(function(critter, vector) {
+    if (critter.act && acted.indexOf(critter) == -1) {
+      acted.push(critter);
+      this.letAct(critter, vector);
+    }
+  }, this);
 };
 
 World.prototype.letAct = function(critter, vector) {
@@ -246,7 +189,7 @@ function WallFollower() {
 
 // The critter looks around its environment (clockwise) until it reaches open space and stops if it reaches its origin direction.
 // Lets the critter move in a straight line or scan to the left if there is an object left-right behind it.
-wallFollower.prototype.act = function(view) {
+WallFollower.prototype.act = function(view) {
 	var start = this.dir;
 	if (view.look(dirPlus(this.dir, -3)) != " ")
 		start = this.dir = dirPlus(this.dir, -2);
@@ -258,29 +201,28 @@ wallFollower.prototype.act = function(view) {
 	return {type: "move", direction: this.dir};
 };
 
-// Returns a LifeLikeWorld object which contains all the attributes and methods of a World object.
-function LifeLikeWorld(map, legend) {
+// Returns a LifelikeWorld object which contains all the attributes and methods of a World object.
+function LifelikeWorld(map, legend) {
 	World.call(this, map, legend);
 }
 
-LifeLikeWorld.prototype = Object.create(World.prototype);
+LifelikeWorld.prototype = Object.create(World.prototype);
 
 var actionTypes = Object.create(null);
 
 // Checks whether it returned an action, if there is a available handler function for the returned action 
 // and if it returned true after calling it.
 // If none of the above is true the critter loses energy and is destroyed if its energy level reaches zero or below.
-LifeLikeWorld.prototype.letAct = function(critter, vector) {
-	var action = critter.act(new View(this, vector));
-	var handled = action && 
-		action.type in actionTypes && 
-		actionTypes[action.type].call(this, critter, vector, action);
-
-	if (!handled) {
-		critter.energy -= 0.2;
-		if (critter.energy <= 0)
-			this.grid.set(vector, null);
-	}
+LifelikeWorld.prototype.letAct = function(critter, vector) {
+  var action = critter.act(new View(this, vector));
+  var handled = action &&
+    action.type in actionTypes &&
+    actionTypes[action.type].call(this, critter, vector, action);
+  if (!handled) {
+    critter.energy -= 0.2;
+    if (critter.energy <= 0)
+      this.grid.set(vector, null);
+  }
 };
 
 // The critter rises in energy level and returns true.
@@ -338,7 +280,7 @@ function Plant() {
 }
 
 // Returns a reproduce action if its energy level is higher than 15 and a grow action if lower than 20.
-Plant.prototype.act = function() {
+Plant.prototype.act = function(view) {
 	if (this.energy > 15) {
 		var space = view.find(" ");
 		if (space)
@@ -360,12 +302,12 @@ SmartPlantEater.prototype.act = function(view) {
 	var start = space;
 	if (this.energy > 80 && space) // If the critter's energy level is beyond 80 and there is available space it reproduces.
 		return {type: "reproduce", direction: space};
-	if (plants) // If there are multiple plants nearby and the counter reaches 2 or more the critter eats.
+	if (plants) { // If there are multiple plants nearby and the counter reaches 2 or more the critter eats.
 		if (count >= 2 && plants.length >= 2)
 			count = 0;
 			return {type: "eat", direction: randomElement(plants)};
-		else
-			count += 1;
+		count += 1;
+	}
 	if (space) { // Prevents the critter from moving around an object in circles or moves to the found location otherwise.
 		if (view.look(dirPlus(space, -3)) != " ")
 			start = space = dirPlus(space, -2);
@@ -394,11 +336,46 @@ Predator.prototype.act = function(view) {
 	}
 };
 
-var world = new World(plan, {"#": Wall, "~": WallFollower, "o": BouncingCritter});
-console.log(world.toString());
+// Sets the refresh state to a default of false.
+var mapRefreshState = false;
 
-for (var i = 0; i < 5; i++) {
+// Calls the turn function on the world variable and sets the world html id to the corresponding largeValley variable.
+function refreshMap() {
 	world.turn();
-	console.log(world.toString());
+	document.getElementById("world").innerHTML = world.toString();
 }
 
+// calls the refreshMap function by an interval of 200ms and sets the refrsh state to true if false.
+function setMapInterval() {
+	if (!mapRefreshState)
+		int = setInterval(refreshMap, 200);
+		mapRefreshState = true;
+}
+
+// Starts the world.
+setMapInterval();
+
+var world = new LifelikeWorld(
+  ["####################################################",
+   "#                 ####         ****              ###",
+   "#   *  @  ##                 ########       OO    ##",
+   "#   *    ##        O O                 ****       *#",
+   "#       ##*                        ##########     *#",
+   "#      ##***  *         ****                     **#",
+   "#* **  #  *  ***      #########                  **#",
+   "#* **  #      *               #   *              **#",
+   "#     ##              #   O   #  ***          ######",
+   "#*            @       #       #   *        O  #    #",
+   "#*                    #  ######                 ** #",
+   "###          ****          ***                  ** #",
+   "#       O                        @         O       #",
+   "#   *     ##  ##  ##  ##               ###      *  #",
+   "#   **         #              *       #####  O     #",
+   "##  **  O   O  #  #    ***  ***        ###      ** #",
+   "###               #   *****                    ****#",
+   "####################################################"],
+  {"#": Wall,
+   "@": Predator,
+   "O": SmartPlantEater,
+   "*": Plant}
+);
