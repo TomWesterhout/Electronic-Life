@@ -281,7 +281,7 @@ function Plant() {
 
 // Returns a reproduce action if its energy level is higher than 15 and a grow action if lower than 20.
 Plant.prototype.act = function(view) {
-	if (this.energy > 15) {
+	if (this.energy > 20) {
 		var space = view.find(" ");
 		if (space)
 			return {type: "reproduce", direction: space};
@@ -292,49 +292,44 @@ Plant.prototype.act = function(view) {
 
 function SmartPlantEater() {
 	this.energy = 20;
+	this.direction = "s";
 }
 
 // Performs different actions based on the outcome of the defined conditionals.
 SmartPlantEater.prototype.act = function(view) {
 	var space = view.find(" ");
 	var plants = view.findAll("*");
-	var count = 0;
-	var start = space;
 	if (this.energy > 80 && space) // If the critter's energy level is beyond 80 and there is available space it reproduces.
 		return {type: "reproduce", direction: space};
-	if (plants) { // If there are multiple plants nearby and the counter reaches 2 or more the critter eats.
-		if (count >= 2 && plants.length >= 2)
-			count = 0;
-			return {type: "eat", direction: randomElement(plants)};
-		count += 1;
+	if (plants.length > 1) { // If there are multiple plants nearby and the counter reaches 1 or more the critter eats.
+		return {type: "eat", direction: randomElement(plants)};
 	}
-	if (space) { // Prevents the critter from moving around an object in circles or moves to the found location otherwise.
-		if (view.look(dirPlus(space, -3)) != " ")
-			start = space = dirPlus(space, -2);
-		return {type: "move", direction: space};
-	}
+	if (view.look(this.direction) != " ")
+		this.direction = space || "s";
+	return {type: "move", direction: this.direction};
 };
 
 // Creates a Predator object.
 function Predator() {
 	this.energy = 50;
+	this.direction = "s";
+	this.totalFood = [];
 }
 
 // Performs different actions based on the outcome of the defined conditionals.
 Predator.prototype.act = function(view) {
 	var space = view.find(" ");
-	var critters = view.findAll("O").concat(view.findAll("*"));
-	var start = space;
-	if (this.energy > 100 && space)
+	var critters = view.findAll("O");
+	if (this.energy > 80 && space)
 		return {type: "reproduce", direction: space};
-	if (critters)
+	if (critters.length >= 1)
 		return {type: "eat", direction: randomElement(critters)};
-	if (space) { // Prevents the critter from moving around an object in circles or moves to the found location otherwise.
-		if (view.look(dirPlus(space, -3)) != " ")
-			start = space = dirPlus(space, -2);
-		return {type: "move", direction: space};
-	}
+	if (view.look(this.direction) != " ")
+		this.direction = space || "s";
+	return {type: "move", direction: this.direction};
 };
+
+
 
 // Sets the refresh state to a default of false.
 var mapRefreshState = false;
@@ -342,13 +337,18 @@ var mapRefreshState = false;
 // Calls the turn function on the world variable and sets the world html id to the corresponding largeValley variable.
 function refreshMap() {
 	world.turn();
-	document.getElementById("world").innerHTML = world.toString();
+	document.getElementById("world").innerHTML = world.toString()
+	.replace(new RegExp("\\*", "g"), "🌳")
+	.replace(new RegExp("@", "g"), "🐅")
+	.replace(new RegExp("O", "g"), "🐃")
+	.replace(new RegExp("#", "g"), "🗻")
+	.replace(new RegExp(" ", "g"), "🌱");
 }
 
 // calls the refreshMap function by an interval of 200ms and sets the refrsh state to true if false.
 function setMapInterval() {
 	if (!mapRefreshState)
-		int = setInterval(refreshMap, 200);
+		setInterval(refreshMap, 1000);
 		mapRefreshState = true;
 }
 
