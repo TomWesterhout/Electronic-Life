@@ -311,7 +311,7 @@ SmartPlantEater.prototype.act = function(view) {
 
 // Creates a Predator object.
 function Predator() {
-	this.energy = 60;
+	this.energy = 70;
 	this.direction = "s";
 	this.totalFood = [];
 }
@@ -320,7 +320,7 @@ function Predator() {
 Predator.prototype.act = function(view) {
 	var space = view.find(" ");
 	var critters = view.findAll("O");
-	if (this.energy > 70 && space)
+	if (this.energy > 75 && space)
 		return {type: "reproduce", direction: space};
 	if (critters.length >= 1)
 		return {type: "eat", direction: randomElement(critters)};
